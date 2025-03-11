@@ -1,7 +1,29 @@
 import "../pagesCSS/LoginPage.css"; // Import CSS file
 import { color1, color2, color3, color4 } from "../components/colors";
+import { useState } from "react";
 
 function LoginPage({ onClickHandler }) {
+  const [data, setData] = useState({
+    username: "",
+
+    password: "",
+  });
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json ; charset=utf-8" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      console.log("User Registered:", result);
+    } catch (error) {
+      console.error("Registration Error:", error);
+    }
+  };
+
   return (
     <section className="login-container">
       <div className="login-logo">
@@ -11,10 +33,26 @@ function LoginPage({ onClickHandler }) {
       <div className="login-box">
         <h1 className="login-heading">Have an account?</h1>
 
-        <input type="text" placeholder="Username" className="login-input" />
-        <input type="password" placeholder="Password" className="login-input" />
+        <input
+          type="text"
+          placeholder="Username"
+          className="login-input"
+          onChange={(e) => {
+            setData({ ...data, username: e.target.value });
+          }}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          className="login-input"
+          onChange={(e) => {
+            setData({ ...data, password: e.target.value });
+          }}
+        />
 
-        <button className="login-button">SIGN IN</button>
+        <button className="login-button" onClick={() => handleSubmit()}>
+          SIGN IN
+        </button>
 
         <div className="login-options">
           <div>

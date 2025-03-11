@@ -1,9 +1,10 @@
 import { register } from "module";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { validateLoginInput } from "../validators/login.js";
+import { validateRegisterInput } from "../validators/register.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.models.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -24,7 +25,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 const registerUser = asyncHandler(async (req, res) => {
   const { fullName, email, username, password } = req.body;
 
-  const { errors, isValid } = validateLoginInput(req.body);
+  const { errors, isValid } = validateRegisterInput(req.body);
 
   if (!isValid) {
     console.log(errors);
@@ -38,17 +39,12 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "User with email or username already exists");
   }
 
-  const avatarLocalPath = req.files?.avatar[0]?.path;
-
-  const avatar = await uploadOnCloudinary(avatarLocalPath);
-
   const user = await User.create({
     fullName,
-    avatar: avatar.url || "",
     email,
     password,
-    username: username.toLowerCase(),
-  });
+    username,
+  }).then(console.log("user created successfully"));
 
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
@@ -76,7 +72,7 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "username is required");
   }
 
-  const user = await username.findOne({ username });
+  const user = await User.findOne({ username });
 
   if (!user) {
     throw new ApiError(404, "username is not registered");
@@ -92,9 +88,9 @@ const loginUser = asyncHandler(async (req, res) => {
     user._id
   );
 
-  const loggedInUser = await user
-    .findById(_id)
-    .select("-password -refreshToken");
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
 
   const options = {
     httpOnly: true,

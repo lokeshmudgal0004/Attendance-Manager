@@ -18,14 +18,11 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
-    fullname: {
+    fullName: {
       type: String,
       required: true,
       index: true,
       trim: true,
-    },
-    avatar: {
-      type: String, //cloudinary
     },
     password: {
       type: String,
@@ -77,4 +74,4 @@ userSchema.methods.generateRefreshToken = function () {
   );
 };
 
-export const user = mongoose.model("User", userSchema);
+export const User = mongoose.model("User", userSchema);
