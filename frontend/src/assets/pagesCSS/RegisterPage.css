@@ -1,0 +1,99 @@
+/* RegisterPage.css */
+@font-face {
+  font-family: "Drakors";
+  src: url("../fonts/Drakors.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.register-container {
+  background: #a6bd8f; /* color2 */
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.register-box {
+  background-color: #e8e9e4; /* color3 */
+  color: #ffffff; /* color4 */
+  height: 750px;
+  width: 600px;
+  border-radius: 35px;
+  border: 2px solid #a6bd8f; /* color2 */
+  box-shadow: 7px 7px 10px gray;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.register-logo {
+  font-family: "Drakors", sans-serif;
+  font-size: 64px;
+  color: #032539; /* color1 */
+  text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5);
+  animation: zoomInOut 2s infinite alternate ease-in-out;
+}
+
+@keyframes zoomInOut {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+.register-heading {
+  color: #032539; /* color1 */
+  display: grid;
+  place-items: center;
+}
+
+.register-label {
+  color: #032539; /* color1 */
+  font-weight: bold;
+  margin-bottom: 5px;
+  align-self: flex-start;
+  margin-left: 15%;
+}
+
+.register-input {
+  border: 2px solid #a6bd8f; /* color2 */
+  height: 40px;
+  width: 70%;
+  margin-bottom: 15px;
+  border-radius: 50px;
+  padding-left: 15px;
+  font-size: 16px;
+}
+
+.register-file {
+  background: #ffffff; /* color4 */
+  border: 2px solid #a6bd8f; /* color2 */
+  width: 70%;
+  margin-bottom: 20px;
+  padding: 5px;
+}
+
+.register-button {
+  background: #a6bd8f; /* color2 */
+  height: 40px;
+  width: 70%;
+  border-radius: 50px;
+  color: #e8e9e4; /* color3 */
+  margin: 10px 0;
+  cursor: pointer;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  transition: 0.3s ease-in-out;
+}
+
+.register-button:hover {
+  background: #032539; /* color1 */
+  color: #ffffff; /* color4 */
+}
