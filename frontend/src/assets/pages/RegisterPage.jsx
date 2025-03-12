@@ -22,7 +22,13 @@ function RegisterPage({}) {
       );
 
       const result = await response.json();
-      console.log("User Registered:", result);
+
+      if (!response.ok) {
+        alert(result.err?.validation || "registration failed");
+        return;
+      }
+
+      console.log("User Registered:", result.response);
     } catch (error) {
       console.error("Registration Error:", error);
     }

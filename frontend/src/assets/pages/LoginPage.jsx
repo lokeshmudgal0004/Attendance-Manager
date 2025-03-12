@@ -10,15 +10,31 @@ function LoginPage({ onClickHandler }) {
   });
 
   const handleSubmit = async () => {
+    if (data.username === "") {
+      alert("username feild is not filled");
+      return;
+    }
+    if (data.password === "") {
+      alert("password is required");
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:8000/api/v1/users/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json ; charset=utf-8" },
+        headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify(data),
+        credentials: "include",
       });
 
-      const result = await response.json();
-      console.log("User Registered:", result);
+      const res = await response.json();
+
+      if (!response.ok) {
+        alert(res.errors?.username || res.errors?.password || "login failed");
+        return;
+      }
+
+      console.log("User Registered:", res.response);
     } catch (error) {
       console.error("Registration Error:", error);
     }

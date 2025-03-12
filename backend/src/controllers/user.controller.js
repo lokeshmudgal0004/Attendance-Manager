@@ -5,6 +5,10 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.models.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { validateSessionInput } from "../validators/session.js";
+import { Session } from "../models/session.models.js";
+import { Course } from "../models/course.models.js";
+import { Attendance } from "../models/attendence.models.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -27,6 +31,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const { errors, isValid } = validateRegisterInput(req.body);
 
+  const err = {};
+
   if (!isValid) {
     console.log(errors);
   }
@@ -36,7 +42,8 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (existedUser) {
-    throw new ApiError(409, "User with email or username already exists");
+    err.validation = "User with email or username already exists";
+    return res.status(409).json({ err });
   }
 
   const user = await User.create({
@@ -54,34 +61,33 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Something went wrong while registering the user");
   }
 
-  return res
-    .status(201)
-    .json(new ApiResponse(200, createdUser, "User registered Successfully"));
+  return res.status(201).json({
+    response: new ApiResponse(200, createdUser, "User registered Successfully"),
+  });
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  /*const { errors, isValid } = validateLoginInput(req.body);
-
-  if(!isValid){
-    console.log(errors);
-  }*/
+  const errors = {};
 
   const { username, password } = req.body;
 
   if (!username) {
-    throw new ApiError(400, "username is required");
+    errors.username = "password is required";
+    return res.status(404).json({ errors });
   }
 
   const user = await User.findOne({ username });
 
   if (!user) {
-    throw new ApiError(404, "username is not registered");
+    errors.username = "username is not registered";
+    return res.status(404).json({ errors });
   }
 
   const isPasswordValid = await user.isPasswordCorrect(password);
 
   if (!isPasswordValid) {
-    throw new ApiError(401, "Invalid user password");
+    errors.password = "Invalid user password";
+    return res.status(401).json({ errors });
   }
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
@@ -95,14 +101,15 @@ const loginUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
+    sameSite: "Strict",
   };
 
   return res
     .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
-    .json(
-      new ApiResponse(
+    .json({
+      response: new ApiResponse(
         200,
         {
           user: loggedInUser,
@@ -110,8 +117,8 @@ const loginUser = asyncHandler(async (req, res) => {
           refreshToken,
         },
         "User logged in Successfully"
-      )
-    );
+      ),
+    });
 });
 
 const logoutUser = await asyncHandler(async (req, res) => {
@@ -200,10 +207,186 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Password changes successfully"));
 });
 
+const getUserInfo = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select(
+    "-password -refreshtoken"
+  );
+
+  if (!user) {
+    return res.status(404).json(new ApiResponse(404, {}, "User not found"));
+  }
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        user: user,
+      },
+      "user info provided"
+    )
+  );
+});
+
+const addNewSession = asyncHandler(async (req, res) => {
+  const { user, semester, startedDate, endDate, courses } = req.body;
+
+  const { errors, isValid } = validateSessionInput(req.body);
+
+  if (!isValid) {
+    return res.status(400).json({ errors });
+  }
+
+  // Check if the user already has a session with the same semester
+  const existedSemester = await Session.findOne({ semester, user });
+
+  if (existedSemester) {
+    return res
+      .status(400)
+      .json({ error: "User already has a session with this semester number" });
+  }
+
+  // Check if all courses are unique
+  const hasDuplicateCourses = (courses) =>
+    new Set(courses).size !== courses.length;
+
+  if (hasDuplicateCourses(courses)) {
+    return res
+      .status(400)
+      .json({ error: "Courses should be unique within the session" });
+  }
+
+  // Ensure start date is before end date
+  if (new Date(endDate) < new Date(startedDate)) {
+    return res
+      .status(400)
+      .json({ error: "Start date should be before the end date" });
+  }
+
+  // Store courses and get their IDs
+  const courseIds = await Promise.all(
+    courses.map(async (courseName) => {
+      const newCourse = await Course.create({ courseName });
+      return newCourse._id;
+    })
+  );
+
+  // Create session
+  const newSession = await Session.create({
+    semester,
+    startedAt: startedDate,
+    endDate,
+    courses: courseIds,
+    user: user._id,
+  });
+
+  if (!newSession) {
+    throw new ApiError(500, "Something went wrong while creating the session");
+  }
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, newSession, "Session created successfully"));
+});
+
+const getSessionId = asyncHandler(async (req, res) => {
+  const { user, semester } = req.body;
+
+  const session = await Session.findOne({ user: user._id, semester });
+
+  if (!session) {
+    return res
+      .status(404)
+      .json({ error: "this semester does not exist for user" });
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { sessionId: session._id },
+        "Session found successfully"
+      )
+    );
+});
+
+const deleteSession = asyncHandler(async (req, res) => {
+  const { sessionId } = req.body;
+
+  // Check if session exists
+  const session = await Session.findById(sessionId);
+  if (!session) {
+    return res.status(404).json({ error: "This session does not exist" });
+  }
+
+  // Get all courses linked to this session
+  const courses = session.courses;
+
+  // Delete all attendance records related to these courses
+  await Attendance.deleteMany({ course: { $in: courses } });
+
+  // Delete all courses linked to this session
+  await Course.deleteMany({ _id: { $in: courses } });
+
+  // Finally, delete the session itself
+  await Session.deleteOne({ _id: sessionId });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Session deleted successfully"));
+});
+
+const getAttendancesBySession = asyncHandler(async (req, res) => {
+  const { sessionId, courseName = [], status } = req.body;
+
+  // Validate session existence
+  const session = await Session.findById(sessionId);
+  if (!session) {
+    return res.status(404).json({ error: "This session does not exist" });
+  }
+
+  // Find courses linked to this session
+  let courseFilter = { _id: { $in: session.courses } };
+
+  if (Array.isArray(courseName) && courseName.length > 0) {
+    courseFilter.courseName = { $in: courseName }; // Match courses in the array
+  }
+
+  const courses = await Course.find(courseFilter);
+  if (courses.length === 0) {
+    return res
+      .status(404)
+      .json({ error: "No matching courses found in this session" });
+  }
+
+  // Extract course IDs
+  const courseIds = courses.map((course) => course._id);
+
+  // Query filter for attendance
+  let attendanceFilter = { course: { $in: courseIds } };
+  if (status) {
+    attendanceFilter.status = status; // Filter only if status is provided
+  }
+
+  // Fetch attendance records
+  const attendances = await Attendance.find(attendanceFilter);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, attendances, "Attendances retrieved successfully")
+    );
+});
+
 export {
   registerUser,
   loginUser,
   logoutUser,
   refreshAccessToken,
+  getUserInfo,
+  addNewSession,
+  getSessionId,
   changeCurrentPassword,
+  deleteSession,
+  getAttendancesBySession,
 };

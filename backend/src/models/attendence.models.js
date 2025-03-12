@@ -3,8 +3,9 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const attendanceSchema = new Schema({
-  attendance: {
-    type: Boolean,
+  status: {
+    type: String,
+    enum: ["present", "absent"],
     required: true,
   },
   date: {
@@ -13,11 +14,9 @@ const attendanceSchema = new Schema({
   },
   course: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Course", // Link attendance to a course
+    ref: "Course",
     required: true,
   },
 });
 
-const Attendance = mongoose.model("Attendance", attendanceSchema);
-
-module.exports = attendance;
+export const Attendance = mongoose.model("Attendance", attendanceSchema);

@@ -3,8 +3,7 @@ import mongoose from "mongoose";
 const sessionSchema = new mongoose.Schema(
   {
     semester: {
-      type: Number,
-      unique: true,
+      type: String,
       required: true,
     },
     startedAt: {
@@ -13,10 +12,6 @@ const sessionSchema = new mongoose.Schema(
     },
     endDate: {
       type: Date,
-    },
-    color: {
-      type: String,
-      default: "lavender-0",
     },
     courses: [
       {
@@ -35,4 +30,4 @@ const sessionSchema = new mongoose.Schema(
   }
 );
 
-export const session = mongoose.model("Session", sessionSchema);
+export const Session = mongoose.model("Session", sessionSchema);

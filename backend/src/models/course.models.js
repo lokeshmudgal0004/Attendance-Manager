@@ -7,11 +7,6 @@ const courseSchema = new Schema(
       required: true,
       unique: true,
     },
-    session: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Session", // Reference to the Session model
-      required: true,
-    },
   },
   { timestamps: true }
 );
