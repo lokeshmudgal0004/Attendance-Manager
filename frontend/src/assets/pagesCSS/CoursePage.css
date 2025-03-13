@@ -1,0 +1,76 @@
+.course-container {
+  width: 80%;
+  min-height: 100vh;
+  margin: auto;
+  padding: 20px;
+}
+
+/* Attendance Summary */
+.attendance-summary {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  height: 150px;
+}
+
+.attendance-box {
+  flex: 1;
+  text-align: center;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 32px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.total {
+  background-color: #f3f3f3;
+  color: #333;
+}
+
+.present {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.absent {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.add-attendance {
+  padding: 10px 15px;
+  background-color: white;
+  color: #a6bd8f;
+  border: 2px solid #a6bd8f;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.add-attendance:hover {
+  background-color: #a6bd8f;
+  color: #e8e9e4;
+}
+
+.filter-dropdown {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.attendance-records {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  border-bottom: solid 2px #333;
+}

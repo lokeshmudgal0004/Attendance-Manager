@@ -1,3 +1,22 @@
+@font-face {
+  font-family: "Drakors";
+  src: url("../fonts/Drakors.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@keyframes zoomInOut {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1); /* Zoom in */
+  }
+  100% {
+    transform: scale(1); /* Zoom out */
+  }
+}
+
 .navbar {
   background: var(--color2);
   height: 60px;
@@ -20,9 +39,12 @@
 
 .nav-icon {
   color: var(--color3);
+  font-family: "Drakors";
   font-size: 25px;
   margin: 15px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+
+  animation: zoomInOut 2s infinite ease-in-out;
 }
 
 .nav-profile {

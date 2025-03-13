@@ -1,6 +1,7 @@
 import "../pagesCSS/RegisterPage.css"; // Import CSS file
 import { color1, color2, color3, color4 } from "../components/colors";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function RegisterPage({}) {
   const [data, setData] = useState({
@@ -9,6 +10,8 @@ function RegisterPage({}) {
     password: "",
     fullName: "",
   });
+
+  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     try {
@@ -29,6 +32,7 @@ function RegisterPage({}) {
       }
 
       console.log("User Registered:", result.response);
+      navigate("/");
     } catch (error) {
       console.error("Registration Error:", error);
     }
