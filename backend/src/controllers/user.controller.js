@@ -13,8 +13,10 @@ import { Attendance } from "../models/attendence.models.js";
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
-    const accessToken = await user.generateAccessToken;
-    const refreshToken = await user.generateRefreshToken;
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
+
+    console.log(accessToken);
 
     user.refreshToken = refreshToken;
 
@@ -93,6 +95,8 @@ const loginUser = asyncHandler(async (req, res) => {
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
     user._id
   );
+
+  console.log(accessToken);
 
   const loggedInUser = await User.findById(user._id).select(
     "-password -refreshToken"
@@ -228,13 +232,14 @@ const getUserInfo = asyncHandler(async (req, res) => {
 });
 
 const addNewSession = asyncHandler(async (req, res) => {
-  const { user, semester, startedDate, endDate, courses } = req.body;
+  const { semester, startedDate, endDate, courses } = req.body;
+  const user = req.user;
 
-  const { errors, isValid } = validateSessionInput(req.body);
+  /*const { errors, isValid } = validateSessionInput(req.body);*/
 
-  if (!isValid) {
+  /*if (!isValid) {
     return res.status(400).json({ errors });
-  }
+  }*/
 
   // Check if the user already has a session with the same semester
   const existedSemester = await Session.findOne({ semester, user });
@@ -245,14 +250,9 @@ const addNewSession = asyncHandler(async (req, res) => {
       .json({ error: "User already has a session with this semester number" });
   }
 
-  // Check if all courses are unique
-  const hasDuplicateCourses = (courses) =>
-    new Set(courses).size !== courses.length;
-
-  if (hasDuplicateCourses(courses)) {
-    return res
-      .status(400)
-      .json({ error: "Courses should be unique within the session" });
+  const date = new Date(startedDate);
+  if (isNaN(date.getTime())) {
+    return res.status(400).json({ error: "Invalid date format" });
   }
 
   // Ensure start date is before end date
@@ -262,26 +262,33 @@ const addNewSession = asyncHandler(async (req, res) => {
       .json({ error: "Start date should be before the end date" });
   }
 
-  // Store courses and get their IDs
-  const courseIds = await Promise.all(
-    courses.map(async (courseName) => {
-      const newCourse = await Course.create({ courseName });
-      return newCourse._id;
-    })
-  );
-
-  // Create session
+  // Create session first without courses
   const newSession = await Session.create({
     semester,
     startedAt: startedDate,
     endDate,
-    courses: courseIds,
+    courses: [], // Empty array initially
     user: user._id,
   });
 
   if (!newSession) {
     throw new ApiError(500, "Something went wrong while creating the session");
   }
+
+  // Store courses and get their IDs
+  const courseIds = await Promise.all(
+    courses.map(async (courseName) => {
+      const newCourse = await Course.create({
+        courseName,
+        semester: newSession._id, // Assign session ID
+      });
+      return newCourse._id;
+    })
+  );
+
+  // Update session with course IDs
+  newSession.courses = courseIds;
+  await newSession.save();
 
   return res
     .status(201)
@@ -378,7 +385,25 @@ const getAttendancesBySession = asyncHandler(async (req, res) => {
     );
 });
 
+const getSessions = asyncHandler(async (req, res) => {
+  if (!req.user || !req.user._id) {
+    return res.status(401).json({ message: "Unauthorized: User not found" });
+  }
+
+  const user = req.user;
+
+  // Find all sessions for the given user
+  const sessions = await Session.find({ user: user._id });
+
+  console.log(sessions);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, sessions, "Sessions retrieved successfully"));
+});
+
 export {
+  getSessions,
   registerUser,
   loginUser,
   logoutUser,

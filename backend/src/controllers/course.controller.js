@@ -167,7 +167,31 @@ const getAttendances = asyncHandler(async (req, res) => {
     );
 });
 
+const getCourses = asyncHandler(async (req, res) => {
+  const { sessionId } = req.body; // Extract sessionId from query params
+
+  // Validate session existence
+  const session = await Session.findById(sessionId);
+  if (!session) {
+    return res.status(404).json({ error: "This session does not exist" });
+  }
+
+  // Get course names from course IDs stored in session
+  const courses = await Course.find({ _id: { $in: session.courses } }).select(
+    "courseName"
+  );
+
+  if (!courses.length) {
+    return res.status(404).json({ error: "No courses found for this session" });
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, courses, "Course names retrieved successfully"));
+});
+
 export {
+  getCourses,
   addAttendance,
   getCourseId,
   deleteAttendance,

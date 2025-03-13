@@ -8,6 +8,7 @@ import {
   addNewSession,
   getSessionId,
   deleteSession,
+  getSessions,
   getAttendancesBySession,
 } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
@@ -26,5 +27,6 @@ router.route("/addSession").post(verifyJwt, addNewSession);
 router.route("/getSession").post(verifyJwt, getSessionId);
 router.route("/delete").post(verifyJwt, deleteSession);
 router.route("/getAttendence").post(verifyJwt, getAttendancesBySession);
+router.route("/getSessions").get(verifyJwt, getSessions);
 
 export default router;
