@@ -6,7 +6,9 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5174",
+    origin: (origin, callback) => {
+      callback(null, true);
+    },
     credentials: true,
   })
 );
