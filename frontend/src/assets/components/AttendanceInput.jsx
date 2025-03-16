@@ -19,7 +19,7 @@ const AttendanceInput = ({}) => {
     try {
       // Fetch courseId using sessionId & courseName
       const response = await fetch(
-        "http://localhost:8000/api/v1/courses/getCourse",
+        `${process.env.REACT_APP_API_URL}/api/v1/courses/getCourse`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json;charset=utf-8" },
@@ -43,7 +43,7 @@ const AttendanceInput = ({}) => {
 
       // Now send attendance data with the updated courseId
       const response2 = await fetch(
-        "http://localhost:8000/api/v1/courses/add",
+        `${process.env.REACT_APP_API_URL}/api/v1/courses/add`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json;charset=utf-8" },
