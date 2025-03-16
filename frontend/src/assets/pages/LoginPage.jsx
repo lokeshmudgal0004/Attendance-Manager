@@ -24,7 +24,7 @@ function LoginPage({ onClickHandler }) {
 
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/v1/users/login`,
+        `${import.meta.env.VITE_API_URL}/api/v1/users/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json; charset=utf-8" },

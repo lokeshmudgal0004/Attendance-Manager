@@ -14,7 +14,7 @@ const UserInfo = () => {
     const fetchSessions = async () => {
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/api/v1/users/getInfo`,
+          `${import.meta.env.VITE_API_URL}/api/v1/users/getInfo`,
           {
             credentials: "include",
           }

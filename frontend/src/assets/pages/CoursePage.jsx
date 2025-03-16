@@ -21,7 +21,7 @@ const CoursePage = ({}) => {
     const fetchSessions = async () => {
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/api/v1/courses/getAttendance`,
+          `${import.meta.env.VITE_API_URL}/api/v1/courses/getAttendance`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json;charset=utf-8" },
@@ -60,7 +60,7 @@ const CoursePage = ({}) => {
   const onDeleteEntry = async (dateToDelete) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/v1/courses/delete`,
+        `${import.meta.env.VITE_API_URL}/api/v1/courses/delete`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json;charset=utf-8" },

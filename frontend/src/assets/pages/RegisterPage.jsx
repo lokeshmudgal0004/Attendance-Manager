@@ -16,7 +16,7 @@ function RegisterPage({}) {
   const handleSubmit = async () => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/v1/users/register`,
+        `${import.meta.env.VITE_API_URL}/api/v1/users/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json ; charset=utf-8" },

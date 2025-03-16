@@ -17,7 +17,7 @@ const SessionInput = () => {
     console.log(data);
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/v1/users/addSession`,
+        `${import.meta.env.VITE_API_URL}/api/v1/users/addSession`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json;charset=utf-8" },
