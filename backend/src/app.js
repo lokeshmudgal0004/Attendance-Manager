@@ -6,9 +6,8 @@ const app = express();
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      callback(null, true);
-    },
+    origin:
+      "https://attendance-manager-m4ag-git-main-lokesh-mudgals-projects.vercel.app",
     credentials: true,
   })
 );
