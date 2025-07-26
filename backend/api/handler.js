@@ -1,4 +1,7 @@
+import dotenv from "dotenv";
+dotenv.config({ path: "./.env" });
+
 export default function handler(req, res) {
-  console.log("✅ Minimal handler reached");
-  return res.status(200).json({ message: "Simple handler works" });
+  console.log("✅ dotenv loaded");
+  return res.status(200).json({ message: "dotenv test passed" });
 }
