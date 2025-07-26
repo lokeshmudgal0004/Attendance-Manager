@@ -3,27 +3,35 @@ import { app } from "../src/app.js";
 import dotenv from "dotenv";
 import { connectDB } from "../src/db/index.js";
 
+// Load env
 dotenv.config({ path: "./.env" });
 
 let server;
 let isConnected = false;
 
 const handler = async (req, res) => {
-  if (!isConnected) {
-    try {
+  try {
+    console.log("⚡ Function invoked:", req.url);
+
+    if (!isConnected) {
+      console.log("🧠 Attempting to connect to MongoDB...");
       await connectDB();
       isConnected = true;
-    } catch (err) {
-      console.error("❌ MongoDB connection error:", err);
-      return res.status(500).json({ error: "DB connection failed" });
+      console.log("✅ MongoDB connection successful.");
     }
-  }
 
-  if (!server) {
-    server = serverless(app);
-  }
+    if (!server) {
+      server = serverless(app);
+      console.log("🚀 Serverless wrapper initialized.");
+    }
 
-  return server(req, res);
+    return server(req, res);
+  } catch (err) {
+    console.error("❌ Fatal error in handler:", err);
+    return res
+      .status(500)
+      .json({ error: "Server crashed", details: err.message });
+  }
 };
 
 export default handler;
