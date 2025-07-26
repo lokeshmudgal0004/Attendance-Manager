@@ -1,9 +1,19 @@
-import dotenv from "dotenv";
-dotenv.config({ path: "./.env" });
+import mongoose from "mongoose";
 
-import { app } from "../src/app.js";
+export const connectDB = async () => {
+  try {
+    const connection = await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
 
-export default function handler(req, res) {
-  console.log("✅ app imported");
-  res.status(200).json({ message: "app is working" });
-}
+    console.log(`✅ MongoDB connected at ${connection.connection.host}`);
+
+    // Ping the DB to be sure:
+    await mongoose.connection.db.admin().ping();
+    console.log("✅ Pinged MongoDB successfully");
+  } catch (err) {
+    console.error("❌ MongoDB connection error:", err);
+    throw err;
+  }
+};
