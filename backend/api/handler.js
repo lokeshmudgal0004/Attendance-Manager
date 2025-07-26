@@ -1,25 +1,29 @@
-// api/handler.js
 import serverless from "serverless-http";
 import { app } from "../src/app.js";
 import dotenv from "dotenv";
 import { connectDB } from "../src/db/index.js";
 
-dotenv.config({
-  path: "./.env",
-});
+dotenv.config({ path: "./.env" });
 
-// Ensure DB connection before exporting
+let server;
 let isConnected = false;
 
-async function setup() {
+const handler = async (req, res) => {
   if (!isConnected) {
-    await connectDB();
-    isConnected = true;
+    try {
+      await connectDB();
+      isConnected = true;
+    } catch (err) {
+      console.error("❌ MongoDB connection error:", err);
+      return res.status(500).json({ error: "DB connection failed" });
+    }
   }
-  return serverless(app);
-}
 
-export default async function handler(req, res) {
-  const server = await setup();
+  if (!server) {
+    server = serverless(app);
+  }
+
   return server(req, res);
-}
+};
+
+export default handler;
